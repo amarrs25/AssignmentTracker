@@ -1,0 +1,32 @@
+[
+  {
+    "ClassId": 1,
+    "ClassName": "Mathematics",
+    "ClassDesc": "An advanced calculus course",
+    "ProfessorName": "Dr. Jane Doe"
+  },
+  {
+    "ClassId": 2,
+    "ClassName": "Mathematics",
+    "ClassDesc": "An advanced calculus course",
+    "ProfessorName": "Dr. Jane Doe"
+  },
+  {
+    "ClassId": 3,
+    "ClassName": "Mathematics",
+    "ClassDesc": "An advanced calculus course",
+    "ProfessorName": "Dr. Jane Doe"
+  },
+  {
+    "ClassId": 4,
+    "ClassName": "Religion",
+    "ClassDesc": "A course on religion",
+    "ProfessorName": "Dr. Madeline Schaffer"
+  },
+  {
+    "ClassId": 5,
+    "ClassName": "Mathematics",
+    "ClassDesc": "An advanced calculus course",
+    "ProfessorName": "Dr. Jane Doe"
+  }
+]

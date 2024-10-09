@@ -1,0 +1,18 @@
+[
+  {
+    "AssignmentId": 1,
+    "ClassId": 1,
+    "AssignmentName": "Homework 1",
+    "AssignmentDesc": "Solve all exercises from Chapter 1",
+    "AssignmentDate": "0001-01-01T00:00:00",
+    "IsCompleted": false
+  },
+  {
+    "AssignmentId": 2,
+    "ClassId": 2,
+    "AssignmentName": "Homework 2",
+    "AssignmentDesc": "Solve all exercises from Chapter 2",
+    "AssignmentDate": "0001-01-01T00:00:00",
+    "IsCompleted": true
+  }
+]
