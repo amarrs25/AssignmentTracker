@@ -31,12 +31,32 @@ public class AddPriority
             var jsonData = await File.ReadAllTextAsync(prioritiesFilePath);
             var priorities = JsonConvert.DeserializeObject<List<PriorityModel>>(jsonData) ?? new List<PriorityModel>();
 
-            // Add new priority (example: deserialized from the request body)
+            // Read the request body
             var requestBody = await req.ReadAsStringAsync();
+
+            // Validate the request body
+            if (string.IsNullOrWhiteSpace(requestBody))
+            {
+                _logger.LogWarning("Request body is null or empty.");
+                var badRequestResponse = req.CreateResponse(HttpStatusCode.BadRequest);
+                await badRequestResponse.WriteStringAsync("Request body cannot be null or empty.");
+                return badRequestResponse;
+            }
+
+            // Deserialize the request body to a PriorityModel
             var newPriority = JsonConvert.DeserializeObject<PriorityModel>(requestBody);
-            
+            if (newPriority == null)
+            {
+                _logger.LogWarning("Deserialization of request body failed.");
+                var badRequestResponse = req.CreateResponse(HttpStatusCode.BadRequest);
+                await badRequestResponse.WriteStringAsync(
+                    "Invalid request body. Please provide a valid PriorityModel.");
+                return badRequestResponse;
+            }
+
+            // Add the new priority using the priority service
             var updatedPriorities = _priorityService.AddPriority(priorities, newPriority);
-            
+
             // Write updated data back to the file
             var updatedJsonData = JsonConvert.SerializeObject(updatedPriorities, Formatting.Indented);
             await File.WriteAllTextAsync(prioritiesFilePath, updatedJsonData);
