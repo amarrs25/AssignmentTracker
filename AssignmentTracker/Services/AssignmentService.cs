@@ -4,9 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace AssignmentTracker.Services;
 
-public class AssignmentService: IAssignmentService
+public class AssignmentService : IAssignmentService
 {
     private readonly ILogger<AssignmentService> _logger;
+
     public AssignmentService(ILogger<AssignmentService> logger)
     {
         _logger = logger;
@@ -18,8 +19,9 @@ public class AssignmentService: IAssignmentService
         {
             _logger.LogInformation($"AddAssignment function accessed at: {DateTime.Now}");
 
+            // Generate a new ID for the assignment
             newAssignment.AssignmentId = NewId(assignments);
-            
+
             _logger.LogInformation($" \n AssignmentId value: {newAssignment.AssignmentId}" +
                                    $" \n ClassId value: {newAssignment.ClassId}" +
                                    $" \n AssignmentName value: {newAssignment.AssignmentName}" +
@@ -36,10 +38,11 @@ public class AssignmentService: IAssignmentService
                 AssignmentDate = newAssignment.AssignmentDate,
                 IsCompleted = newAssignment.IsCompleted
             };
+
             assignments.Add(result);
-            
+
             _logger.LogInformation($"AddAssignment completed: {DateTime.Now} \n Result: {result}");
-            
+
             return assignments;
         }
         catch (Exception ex)
@@ -48,12 +51,30 @@ public class AssignmentService: IAssignmentService
             throw;
         }
     }
-    
+
+    public List<AssignmentModel> GetAssignment(List<AssignmentModel> assignments)
+    {
+        if (assignments == null || assignments.Count == 0)
+        {
+            _logger.LogError("Assignments list is null or empty");
+            throw new ArgumentNullException(nameof(assignments), "The assignments list cannot be null or empty.");
+        }
+
+        return assignments;
+    }
+
+    public void ValidateNewAssignment(AssignmentModel newAssignment)
+    {
+        if (newAssignment == null)
+        {
+            _logger.LogError("Invalid assignment entered");
+            throw new ArgumentNullException(nameof(newAssignment), "Empty or null assignment entered.");
+        }
+    }
+
     private int NewId(List<AssignmentModel> assignments)
     {
-        var maxId = assignments.Any() ? assignments.Max(a => int.Parse(a.AssignmentId.ToString())) : 0;
-        var newId = maxId + 1;
-        
-        return newId;
+        var maxId = assignments.Any() ? assignments.Max(a => a.AssignmentId) : 0;
+        return maxId + 1;
     }
 }

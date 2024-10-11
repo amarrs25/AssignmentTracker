@@ -6,40 +6,51 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace  AssignmentTracker.API;
+namespace AssignmentTracker.API;
 
 public class AddAssignment
 {
-    private readonly ILogger<AddAssignment> _logger;
     private readonly IAssignmentService _assignmentService;
+    private readonly IDataService _dataService;
+    private readonly ILogger<AddAssignment> _logger;
 
-    public AddAssignment(ILogger<AddAssignment> logger, IAssignmentService assignmentService)
+    public AddAssignment(ILogger<AddAssignment> logger, IAssignmentService assignmentService, IDataService dataService)
     {
         _logger = logger;
         _assignmentService = assignmentService;
+        _dataService = dataService;
     }
 
     [Function("AddAssignment")]
     public async Task<HttpResponseData> RunAsync([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
     {
-        var assignmentsFilePath = Path.Combine(AppContext.BaseDirectory, "../../../assignments.txt");
-        _logger.LogInformation($"Resolved file path: {assignmentsFilePath}");
-
         try
         {
-            // Read the existing content of the file
-            var jsonData = await File.ReadAllTextAsync(assignmentsFilePath);
-            var assignments = JsonConvert.DeserializeObject<List<AssignmentModel>>(jsonData) ?? new List<AssignmentModel>();
+            _logger.LogInformation($"Function Triggered: AddAssignment at {DateTime.UtcNow}");
 
-            // Add new assignment (example: deserialized from the request body)
+            // Resolve the path to the assignments.txt file
+            var assignmentsFilePath = _dataService.GetFullFilePath("assignments.txt");
+            _logger.LogInformation($"Resolved file path: {assignmentsFilePath}");
+
+            // Use IDataService to read the existing content of the file
+            var jsonData = await _dataService.ReadFile(assignmentsFilePath);
+            var assignments = JsonConvert.DeserializeObject<List<AssignmentModel>>(jsonData) ?? new List<AssignmentModel>();
+            _logger.LogInformation("Assignments List Created");
+
+            // Read the request body
             var requestBody = await req.ReadAsStringAsync();
-            var newAssignment = JsonConvert.DeserializeObject<AssignmentModel>(requestBody);
-            
-            var updatedAssignments = _assignmentService.AddAssignment(assignments, newAssignment);
-            
-            // Write updated data back to the file
-            var updatedJsonData = JsonConvert.SerializeObject(updatedAssignments, Formatting.Indented);
-            await File.WriteAllTextAsync(assignmentsFilePath, updatedJsonData);
+
+            // Deserialize the request body to an AssignmentModel
+            var newAssignment = JsonConvert.DeserializeObject<AssignmentModel>(requestBody!);
+
+            // Validate that the new assignment is not null
+            _assignmentService.ValidateNewAssignment(newAssignment!);
+
+            // Add the new assignment using the assignment service
+            var updatedAssignments = _assignmentService.AddAssignment(assignments, newAssignment!);
+
+            // Write updated data back to the file using IDataService
+            await _dataService.WriteFile(assignmentsFilePath, updatedAssignments);
 
             // Respond with success
             var response = req.CreateResponse(HttpStatusCode.OK);
@@ -48,10 +59,10 @@ public class AddAssignment
         }
         catch (Exception ex)
         {
-            _logger.LogError($"An error occurred: {ex.Message}");
-            var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
-            await errorResponse.WriteStringAsync("An error occurred while adding the assignment.");
-            return errorResponse;
+            _logger.LogError($"Error: {ex.Message}");
+            var response = req.CreateResponse(HttpStatusCode.BadRequest);
+            await response.WriteStringAsync($"Error: {ex.Message}");
+            return response;
         }
     }
 }

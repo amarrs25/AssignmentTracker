@@ -1,8 +1,0 @@
-[
-  {
-    "PriorityId": 1,
-    "AssignmentId": 1,
-    "PriorityName": "Medium",
-    "PriorityType": 2
-  }
-]

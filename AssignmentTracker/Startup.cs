@@ -22,9 +22,9 @@ namespace AssignmentTracker
                     factory.AddProvider(provider);
                 return factory;
             });
-            builder.Services.AddSingleton<IAssignmentService, AssignmentService>();
+            //builder.Services.AddSingleton<IAssignmentService, AssignmentService>();
             //builder.Services.AddSingleton<IClassService, ClassService>();
-            //builder.Services.AddSingleton<IPriorityService, PriorityService>();
+            builder.Services.AddSingleton<IPriorityService, PriorityService>();
         }
     }
 }
