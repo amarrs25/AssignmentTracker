@@ -21,17 +21,17 @@ public class DataService : IDataService
     
      public string GetFullFilePath(string relativePath)
      {
-         var prioritiesFilePath = Path.Combine(_rootPath, relativePath);
+         var fullFilePath = Path.Combine(_rootPath, relativePath);
          
          // Check if the file exists
-         if (!File.Exists(prioritiesFilePath))
+         if (!File.Exists(fullFilePath))
          {
-             _logger.LogWarning("Priorities file not found.");
-             throw new ArgumentNullException(nameof(prioritiesFilePath), "Priorities file not found.");
+             _logger.LogWarning($"{Path.GetFileName(fullFilePath)} file not found.");
+             throw new ArgumentNullException(nameof(fullFilePath), $"{Path.GetFileName(fullFilePath)} file not found.");
          }
          
         // Combine the root path with the relative path to access files in the root directory.
-        return prioritiesFilePath;
+        return fullFilePath;
     }
 
      public async Task<string> ReadFile(string filePath)

@@ -60,7 +60,7 @@ public class AddPriority
         catch (Exception ex)
         {
             _logger.LogError($"Error: {ex.Message}");
-            var response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            var response = req.CreateResponse(HttpStatusCode.BadRequest);
             await response.WriteStringAsync($"Error: {ex.Message}");
             return response;
         }

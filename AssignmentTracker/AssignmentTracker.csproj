@@ -10,29 +10,29 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="coverlet.collector" Version="6.0.2">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
+        <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0"/>
         <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.21.0"/>
-        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions" Version="1.3.0" />
-        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Abstractions" Version="1.3.0"/>
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0"/>
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.0"/>
         <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0"/>
         <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="1.2.0"/>
-        <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.41" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-rc.2.24473.5" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-rc.2.24473.5" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-        <PackageReference Include="Moq" Version="4.20.72" />
-        <PackageReference Include="NUnit" Version="3.14.0" />
+        <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.41"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0-rc.2.24473.5"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-rc.2.24473.5"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
+        <PackageReference Include="Moq" Version="4.20.72"/>
+        <PackageReference Include="NUnit" Version="3.14.0"/>
         <PackageReference Include="NUnit.Analyzers" Version="3.9.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-        <PackageReference Include="NunitXml.TestLogger" Version="4.0.254" />
-        <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10398" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+        <PackageReference Include="NunitXml.TestLogger" Version="4.0.254"/>
+        <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.1-dev-10398"/>
     </ItemGroup>
     <ItemGroup>
         <None Update="host.json">
@@ -42,22 +42,10 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </None>
-        <None Remove="assignments.txt" />
-        <None Remove="classes.txt" />
+        <None Remove="assignments.txt"/>
+        <None Remove="classes.txt"/>
     </ItemGroup>
     <ItemGroup>
         <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
-    </ItemGroup>
-    <ItemGroup>
-      <Compile Remove="Services\ClassService.cs" />
-      <Compile Remove="Services\AssignmentService.cs" />
-      <Compile Remove="Model\ClassModel.cs" />
-      <Compile Remove="Model\AssignmentModel.cs" />
-      <Compile Remove="Interfaces\IClassService.cs" />
-      <Compile Remove="Interfaces\IAssignmentService.cs" />
-      <Compile Remove="API\GetClass.cs" />
-      <Compile Remove="API\GetAssignment.cs" />
-      <Compile Remove="API\AddClass.cs" />
-      <Compile Remove="API\AddAssignment.cs" />
     </ItemGroup>
 </Project>

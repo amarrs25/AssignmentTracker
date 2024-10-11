@@ -1,30 +1,24 @@
 ﻿using System.Net;
 using AssignmentTracker.Interfaces;
-using Microsoft.Extensions.Logging;
+using AssignmentTracker.Model;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace AssignmentTracker.API;
 
 public class GetClass
 {
-    private readonly ILogger<GetClass> _logger;
     private readonly IClassService _classService;
-    private readonly string _rootPath;
+    private readonly IDataService _dataService;
+    private readonly ILogger<GetClass> _logger;
 
-    public GetClass(ILogger<GetClass> logger, IClassService classService)
+    public GetClass(ILogger<GetClass> logger, IClassService classService, IDataService dataService)
     {
         _logger = logger;
         _classService = classService;
-        
-        // Assume project root is two levels up from the base directory (e.g., bin/Debug/net8.0)
-        _rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../.."));
-    }
-
-    private string GetFullFilePath(string relativePath)
-    {
-        // Combine the root path with the relative path to access files in the root directory.
-        return Path.Combine(_rootPath, relativePath);
+        _dataService = dataService;
     }
 
     [Function("GetClass")]
@@ -35,27 +29,19 @@ public class GetClass
             _logger.LogInformation($"Function Triggered: GetClass at {DateTime.UtcNow}");
 
             // Resolve the path to the classes.txt file
-            var classesFilePath = GetFullFilePath("classes.txt");
+            var classesFilePath = _dataService.GetFullFilePath("classes.txt");
             _logger.LogInformation($"Resolved file path: {classesFilePath}");
 
-            // Check if the file exists
-            if (!File.Exists(classesFilePath))
-            {
-                _logger.LogWarning("Classes file not found.");
-                var notFoundResponse = req.CreateResponse(HttpStatusCode.NotFound);
-                await notFoundResponse.WriteStringAsync("Classes file not found.");
-                return notFoundResponse;
-            }
-
-            // Read the content of the classes.txt file
-            var fileContent = await File.ReadAllTextAsync(classesFilePath);
-            _logger.LogInformation("Contents of classes.txt:");
-            _logger.LogInformation(fileContent);
+            // Read the class data from the file
+            var jsonData = await File.ReadAllTextAsync(classesFilePath);
+            var classes = JsonConvert.DeserializeObject<List<ClassModel>>(jsonData) ?? new List<ClassModel>();
+            _classService.GetClass(classes);
+            _logger.LogInformation("Class list is not null");
 
             // Create the response with the file content
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "application/json; charset=utf-8");
-            await response.WriteStringAsync(fileContent);
+            await response.WriteStringAsync(await _dataService.ReadFile(classesFilePath));
 
             _logger.LogInformation($"Function completed: GetClass at {DateTime.UtcNow}");
             return response;
@@ -63,7 +49,7 @@ public class GetClass
         catch (Exception ex)
         {
             _logger.LogError($"Error: {ex.Message}");
-            var response = req.CreateResponse(HttpStatusCode.InternalServerError);
+            var response = req.CreateResponse(HttpStatusCode.BadRequest);
             await response.WriteStringAsync($"Error: {ex.Message}");
             return response;
         }
