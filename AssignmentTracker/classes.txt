@@ -29,4 +29,16 @@
     "ClassDesc": "An advanced calculus course",
     "ProfessorName": "Dr. Jane Doe"
   }
+  {
+      "PriorityId": 1,
+      "AssignmentId": 1,
+      "PriorityName": "Medium",
+      "PriorityType": 2
+    }
+    {
+        "PriorityId": 2,
+        "AssignmentId": 2,
+        "PriorityName": "Hard",
+        "PriorityType": 3
+      }
 ]

@@ -42,8 +42,22 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </None>
+        <None Remove="assignments.txt" />
+        <None Remove="classes.txt" />
     </ItemGroup>
     <ItemGroup>
         <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext"/>
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="Services\ClassService.cs" />
+      <Compile Remove="Services\AssignmentService.cs" />
+      <Compile Remove="Model\ClassModel.cs" />
+      <Compile Remove="Model\AssignmentModel.cs" />
+      <Compile Remove="Interfaces\IClassService.cs" />
+      <Compile Remove="Interfaces\IAssignmentService.cs" />
+      <Compile Remove="API\GetClass.cs" />
+      <Compile Remove="API\GetAssignment.cs" />
+      <Compile Remove="API\AddClass.cs" />
+      <Compile Remove="API\AddAssignment.cs" />
     </ItemGroup>
 </Project>

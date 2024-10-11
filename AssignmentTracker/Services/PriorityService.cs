@@ -46,6 +46,26 @@ public class PriorityService: IPriorityService
         }
     }
     
+    public List<PriorityModel> GetPriority(List<PriorityModel> priorities)
+    {
+        if (priorities.Count == 0)
+        {
+            _logger.LogError("Priorities List is null");
+            throw new ArgumentNullException(nameof(priorities), "The priorities list cannot be null.");
+        }
+    
+        return priorities;
+    }
+
+    public void ValidateNewPriority(PriorityModel newPriority)
+    {
+        if(newPriority == null)
+        {
+            _logger.LogError("Invalid priority entered");
+            throw new ArgumentNullException(nameof(newPriority), "Empty or null priority entered.");
+        }
+    }
+    
     private int NewId(List<PriorityModel> priorities)
     {
         var maxId = priorities.Any() ? priorities.Max(p => int.Parse(p.PriorityId.ToString())) : 0;

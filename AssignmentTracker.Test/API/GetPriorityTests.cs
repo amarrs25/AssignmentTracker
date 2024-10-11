@@ -1,40 +1,42 @@
-using System.Net;
+﻿using System.Net;
 using System.Text;
+using AssignmentTracker.API;
+using AssignmentTracker.Interfaces;
+using AssignmentTracker.Model;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using AssignmentTracker.API;
-using AssignmentTracker.Interfaces;
-using AssignmentTracker.Model;
 using Newtonsoft.Json;
 
-namespace AssignmentTracker.Test;
+namespace AssignmentTracker.Test.API;
 
-public class AddPriorityTests
+public class GetPriorityTests
 {
-    private readonly Mock<ILogger<AddPriority>> _logger;
-    private readonly Mock<IPriorityService> _quickCalculations; //Change
-    private readonly AddPriority _sut; //SUT = System Under Test
+    private readonly Mock<ILogger<GetPriority>> _logger;
+    private readonly Mock<IPriorityService> _priorityService;
+    private readonly Mock<IDataService> _dataService;
+    private readonly GetPriority _sut; //SUT = System Under Test
     
-    public AddPriorityTests()
+    public GetPriorityTests()
     {
-        _logger = new Mock<ILogger<AddPriority>>();
-        _quickCalculations = new Mock<IPriorityService>();
-        _sut = new AddPriority(_logger.Object, _quickCalculations.Object);
+        _logger = new Mock<ILogger<GetPriority>>();
+        _priorityService = new Mock<IPriorityService>();
+        _dataService = new Mock<IDataService>();
+        _sut = new GetPriority(_logger.Object, _priorityService.Object, _dataService.Object);
     }
 
     [Test]
     public async Task Given_PostDataIsCorrect_Then_AddData_Return_Result()
     {
         //Setup
-        var postData = new PriorityModel  //
+        var postData = new PriorityModel()
         {
             AssignmentId = 1,
             PriorityType = 2
         };
-        var result = "Priority added successfully!";
+        var result = "[\r\n  {\r\n    \"PriorityId\": 1,\r\n    \"AssignmentId\": 1,\r\n    \"PriorityName\": \"Medium\",\r\n    \"PriorityType\": 2\r\n  }\r\n]";
         
         // -- HTTPRequestData Setup BEGIN-- You can copy this section for HttpRequestData setup
         var serviceCollection = new ServiceCollection();
@@ -64,12 +66,12 @@ public class AddPriorityTests
         
         var responseContent = await new StreamReader(sutResult.Body).ReadToEndAsync();
         Assert.That(sutResult.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        Assert.That(responseContent, Is.EqualTo("{\"PriorityId\":1,\"AssignmentId\":1,\"PriorityName\":\"Medium\",\"PriorityType\":2}"));
+        Assert.That(responseContent, Is.EqualTo("2\""));
         _logger.Verify(logger => logger.Log(LogLevel.Information, It.IsAny<EventId>(), 
                 It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), ((Func<It.IsAnyType, Exception, string>)It.IsAny<object>())!), 
             Times.Exactly(2));
-        _quickCalculations.Verify(p => p.AddPriority(It.IsAny<List<PriorityModel>>(), It.IsAny<PriorityModel>()), 
-            Times.Exactly(1));
+        _priorityService.Verify(p => p.GetPriority(It.IsAny<List<PriorityModel>>()), 
+            Times.Exactly(1)); 
 
     }
 }

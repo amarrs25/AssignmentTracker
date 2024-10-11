@@ -31,5 +31,6 @@
 
     <ItemGroup>
       <Compile Remove="GetPriorityTests.cs" />
+      <Compile Remove="AddPriorityTests.cs" />
     </ItemGroup>
 </Project>
