@@ -27,49 +27,54 @@ public class GetAssignmentTests
     }
 
     [Test]
-    public async Task GetAssignment_Returns_AssignmentList_When_FileExists()
+public async Task GetAssignment_Returns_AssignmentList_When_FileExists()
+{
+    // Setup
+    var result =
+        "[\r\n  {\r\n    \"AssignmentId\": 1,\r\n    \"ClassId\": 1,\r\n    \"AssignmentName\": \"Math Homework\",\r\n    \"AssignmentDesc\": \"Complete chapters 1-3\",\r\n    \"AssignmentDate\": \"2023-10-05T00:00:00Z\",\r\n    \"IsCompleted\": false\r\n  }\r\n]";
+    var rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../.."));
+    var filePath = "AssignmentTracker/assignments.txt";
+    var fullFilePath = Path.Combine(rootPath, filePath);
+
+    // Mock the IDataService behavior
+    _dataService.Setup(ds => ds.GetFullFilePath(It.IsAny<string>())).Returns(fullFilePath);
+    _dataService.Setup(ds => ds.ReadFile(fullFilePath)).ReturnsAsync(result);
+
+    // -- HTTPRequestData Setup BEGIN--
+    var serviceCollection = new ServiceCollection();
+    serviceCollection.AddScoped<ILoggerFactory, LoggerFactory>();
+    var serviceProvider = serviceCollection.BuildServiceProvider();
+    var context = new Mock<FunctionContext>();
+    context.SetupProperty(c => c.InstanceServices, serviceProvider);
+    var request = new Mock<HttpRequestData>(context.Object);
+    request.Setup(req => req.Headers).Returns(new HttpHeadersCollection());
+    request.Setup(req => req.CreateResponse()).Returns(() =>
     {
-        // Setup
-        var result =
-            "[\r\n  {\r\n    \"AssignmentId\": 1,\r\n    \"ClassId\": 1,\r\n    \"AssignmentName\": \"Math Homework\",\r\n    \"AssignmentDesc\": \"Complete chapters 1-3\",\r\n    \"AssignmentDate\": \"2023-10-05T00:00:00Z\",\r\n    \"IsCompleted\": false\r\n  }\r\n]";
-        var rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../.."));
-        var filePath = "AssignmentTracker/assignments.txt";
-        var fullFilePath = Path.Combine(rootPath, filePath);
+        var response = new Mock<HttpResponseData>(context.Object);
+        response.SetupProperty(r => r.Headers, new HttpHeadersCollection());
+        response.SetupProperty(r => r.StatusCode, HttpStatusCode.OK);
+        var memoryStream = new MemoryStream();
+        response.SetupProperty(r => r.Body, memoryStream);
+        return response.Object;
+    });
 
-        // Mock the IDataService behavior
-        _dataService.Setup(ds => ds.GetFullFilePath(It.IsAny<string>())).Returns(fullFilePath);
-        _dataService.Setup(ds => ds.ReadFile(fullFilePath)).ReturnsAsync(result);
+    // Act
+    var sutResult = await _sut.RunAsync(request.Object);
 
-        // -- HTTPRequestData Setup BEGIN--
-        var serviceCollection = new ServiceCollection();
-        serviceCollection.AddScoped<ILoggerFactory, LoggerFactory>();
-        var serviceProvider = serviceCollection.BuildServiceProvider();
-        var context = new Mock<FunctionContext>();
-        context.SetupProperty(c => c.InstanceServices, serviceProvider);
-        var request = new Mock<HttpRequestData>(context.Object);
-        request.Setup(req => req.Headers).Returns(new HttpHeadersCollection());
-        request.Setup(req => req.CreateResponse()).Returns(() =>
-        {
-            var response = new Mock<HttpResponseData>(context.Object);
-            response.SetupProperty(r => r.Headers, new HttpHeadersCollection());
-            response.SetupProperty(r => r.StatusCode, HttpStatusCode.OK);
-            response.SetupProperty(r => r.Body, new MemoryStream(Encoding.UTF8.GetBytes(result)));
-            return response.Object;
-        });
+    // Rewind the memory stream to read the content written by the API
+    sutResult.Body.Seek(0, SeekOrigin.Begin);
+    var responseContent = await new StreamReader(sutResult.Body).ReadToEndAsync();
 
-        // Act
-        var sutResult = await _sut.RunAsync(request.Object);
+    // Assert
+    Assert.That(sutResult.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+    Assert.That(responseContent, Is.EqualTo(result));
+    _logger.Verify(logger => logger.Log(LogLevel.Information, It.IsAny<EventId>(),
+            It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+        Times.AtLeastOnce);
+    _assignmentService.Verify(a => a.GetAssignment(It.IsAny<List<AssignmentModel>>()),
+        Times.AtLeastOnce);
+}
 
-        // Assert
-        var responseContent = await new StreamReader(sutResult.Body).ReadToEndAsync();
-        Assert.That(sutResult.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        Assert.That(responseContent, Is.EqualTo(result));
-        _logger.Verify(logger => logger.Log(LogLevel.Information, It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(), It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception, string>>()),
-            Times.AtLeastOnce);
-        _assignmentService.Verify(a => a.GetAssignment(It.IsAny<List<AssignmentModel>>()),
-            Times.AtLeastOnce);
-    }
 
     [Test]
     public async Task GetAssignment_Returns_BadRequest_When_FileReadFails()

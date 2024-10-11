@@ -32,10 +32,9 @@ public class AddAssignment
             var assignmentsFilePath = _dataService.GetFullFilePath("assignments.txt");
             _logger.LogInformation($"Resolved file path: {assignmentsFilePath}");
 
-            // Read the existing content of the file
-            var jsonData = await File.ReadAllTextAsync(assignmentsFilePath);
-            var assignments = JsonConvert.DeserializeObject<List<AssignmentModel>>(jsonData) ??
-                              new List<AssignmentModel>();
+            // Use IDataService to read the existing content of the file
+            var jsonData = await _dataService.ReadFile(assignmentsFilePath);
+            var assignments = JsonConvert.DeserializeObject<List<AssignmentModel>>(jsonData) ?? new List<AssignmentModel>();
             _logger.LogInformation("Assignments List Created");
 
             // Read the request body
@@ -50,7 +49,7 @@ public class AddAssignment
             // Add the new assignment using the assignment service
             var updatedAssignments = _assignmentService.AddAssignment(assignments, newAssignment!);
 
-            // Write updated data back to the file
+            // Write updated data back to the file using IDataService
             await _dataService.WriteFile(assignmentsFilePath, updatedAssignments);
 
             // Respond with success

@@ -33,14 +33,24 @@ public class AddClass
             _logger.LogInformation($"Resolved file path: {classesFilePath}");
 
             // Read the existing content of the file
-            var jsonData = await File.ReadAllTextAsync(classesFilePath);
+            string jsonData;
+            try
+            {
+                jsonData = await _dataService.ReadFile(classesFilePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error reading file: {ex.Message}");
+                var errorResponse = req.CreateResponse(HttpStatusCode.BadRequest);
+                await errorResponse.WriteStringAsync($"Error reading file: {ex.Message}");
+                return errorResponse;
+            }
+
             var classes = JsonConvert.DeserializeObject<List<ClassModel>>(jsonData) ?? new List<ClassModel>();
             _logger.LogInformation("Classes List Created");
 
             // Read the request body
             var requestBody = await req.ReadAsStringAsync();
-
-            // Deserialize the request body to a ClassModel
             var newClass = JsonConvert.DeserializeObject<ClassModel>(requestBody!);
 
             // Validate that the new class is not null
@@ -59,9 +69,9 @@ public class AddClass
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error: {ex.Message}");
+            _logger.LogError($"Unexpected error in AddClass: {ex.Message}");
             var response = req.CreateResponse(HttpStatusCode.BadRequest);
-            await response.WriteStringAsync($"Error: {ex.Message}");
+            await response.WriteStringAsync($"Unexpected error: {ex.Message}");
             return response;
         }
     }

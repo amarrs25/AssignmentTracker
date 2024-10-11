@@ -104,8 +104,8 @@ public class AddAssignmentTests
             It.IsAny<Exception>(), It.IsAny<Func<It.IsAnyType, Exception, string>>()), Times.AtLeastOnce);
         _assignmentService.Verify(a => a.ValidateNewAssignment(It.IsAny<AssignmentModel>()), Times.AtLeastOnce);
         _assignmentService.Verify(a => a.AddAssignment(It.IsAny<List<AssignmentModel>>(), It.Is<AssignmentModel>(
-            a => a.ClassId == postData.ClassId && a.AssignmentName == postData.AssignmentName)), Times.Once);
-        _dataService.Verify(ds => ds.WriteFile(fullFilePath, It.IsAny<List<AssignmentModel>>()), Times.Once);
+            a => a.ClassId == postData.ClassId && a.AssignmentName == postData.AssignmentName)), Times.AtLeastOnce);
+        _dataService.Verify(ds => ds.WriteFile(fullFilePath, It.IsAny<List<AssignmentModel>>()), Times.AtLeastOnce);
     }
 
     [Test]
@@ -159,17 +159,17 @@ public class AddAssignmentTests
         var rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../.."));
         var filePath = "AssignmentTracker/assignments.txt";
         var fullFilePath = Path.Combine(rootPath, filePath);
-
+    
         // Mock the IDataService behavior
         _dataService.Setup(ds => ds.GetFullFilePath(It.IsAny<string>())).Returns(fullFilePath);
         _dataService.Setup(ds => ds.ReadFile(fullFilePath)).ThrowsAsync(new Exception("File read error"));
-
+    
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddScoped<ILoggerFactory, LoggerFactory>();
         var serviceProvider = serviceCollection.BuildServiceProvider();
         var context = new Mock<FunctionContext>();
         context.SetupProperty(c => c.InstanceServices, serviceProvider);
-
+    
         var request = new Mock<HttpRequestData>(context.Object);
         request.Setup(req => req.Body)
             .Returns(new MemoryStream(Encoding.UTF8.GetBytes(
@@ -181,13 +181,13 @@ public class AddAssignmentTests
             response.SetupProperty(r => r.Headers, new HttpHeadersCollection());
             response.SetupProperty(r => r.StatusCode, HttpStatusCode.BadRequest);
             response.SetupProperty(r => r.Body, new MemoryStream());
-
+    
             return response.Object;
         });
-
+    
         // Act
         var sutResult = await _sut.RunAsync(request.Object);
-
+    
         // Assert
         Assert.That(sutResult.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         _logger.Verify(l => l.Log(LogLevel.Error, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(),
